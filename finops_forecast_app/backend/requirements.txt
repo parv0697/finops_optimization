@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pandas
+statsmodels
+pmdarima
+prophet
+scikit-learn # For train_test_split and some metrics if needed
+tensorflow # For LSTM models

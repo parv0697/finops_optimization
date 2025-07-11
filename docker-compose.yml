@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./finops_forecast_app/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+    volumes:
+      # Mount the backend code for development (reflects changes without rebuilding image)
+      # For production, you might remove this or use it only for specific data paths.
+      - ./finops_forecast_app/backend/app:/app/app
+      # Persist temp_data, especially processed_cache, across container restarts
+      - ./finops_forecast_app/backend/temp_data:/app/temp_data
+    container_name: finops_backend
+    environment:
+      # Add any environment variables your backend needs
+      # PYTHONUNBUFFERED: 1 # Often useful for seeing logs immediately
+      # TF_CPP_MIN_LOG_LEVEL: 2 # To suppress TensorFlow info/warning logs if desired
+      pass
+    # healthcheck: (optional)
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/"] # Basic healthcheck
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+
+  frontend:
+    build:
+      context: ./finops_forecast_app/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80" # Map host port 3000 to Nginx container port 80
+    volumes:
+      # For development with React hot-reloading, the Docker setup is more complex.
+      # The current frontend Dockerfile is optimized for production builds.
+      # To enable hot-reloading in development with Docker:
+      # 1. Mount src: `      - ./finops_forecast_app/frontend/src:/app/src`
+      # 2. The `npm start` command needs to be run inside the container.
+      # 3. Nginx stage would not be used for dev; use the node development server.
+      # This might require a separate docker-compose.dev.yml or a multi-target Dockerfile.
+      # For simplicity here, this docker-compose is geared towards a production-like build.
+      pass # No volumes needed for production build serving static files
+    container_name: finops_frontend
+    depends_on:
+      - backend # Ensures backend starts before frontend (useful if frontend makes API calls on startup)
+    # environment: (if frontend needed specific build-time or run-time vars via Nginx)
+
+# Optional: Define a default network if needed, though Docker Compose creates one by default.
+# networks:
+#   finops_network:
+#     driver: bridge
+
+# Optional: Define named volumes for more persistent storage if needed beyond bind mounts.
+# volumes:
+#   processed_data_cache:
+```
